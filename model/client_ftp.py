@@ -4,7 +4,7 @@
 
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
-from ftplib import FTP
+from ftplib import FTP, FTP_TLS
 from StringIO import StringIO
 
 
@@ -19,8 +19,7 @@ class ClientFTP(orm.Model):
         'port': fields.integer('Port', size=5, required=True),
         'user': fields.char('User', size=64),
         'password': fields.char('Password', size=64),
-        'connection_ok': fields.selection([('ok', 'Ok'), ('fail', 'Failed')],
-                                          'Connection', readonly=True),
+        'tls': fields.boolean('TLS'),
     }
     _defaults = {
         'port': 21,
@@ -31,20 +30,30 @@ class ClientFTP(orm.Model):
             ftp_conn = self.connect(cr, uid, ids, context)
             ftp_conn.retrlines('LIST')
         except:
-            self.write(cr, uid, ids, {'connection_ok': 'fail'}, context)
+            raise
         else:
-            self.write(cr, uid, ids, {'connection_ok': 'ok'}, context)
             ftp_conn.quit()
+            raise orm.except_orm(
+                _('Success!'),
+                _('Successfully connected to ftp server')
+            )
 
         return True
 
     def connect(self, cr, uid, ids, context=None):
         ids = ids[0] if isinstance(ids, (list, tuple)) else ids
         settings = self.read(cr, uid, ids, [], context)
-        ftp_conn = FTP(timeout=15)
+
+        if settings['tls']:
+            ftp_conn = FTP_TLS(timeout=15)
+        else:
+            ftp_conn = FTP(timeout=15)
+
         try:
             ftp_conn.connect(host=settings['host'], port=settings['port'])
             ftp_conn.login(user=settings['user'], passwd=settings['password'])
+            if settings['tls']:
+                ftp_conn.prot_p()
         except Exception as exc:
             raise orm.except_orm(
                 _('FTP Error'),

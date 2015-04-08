@@ -4,36 +4,37 @@
         <record id="view_client_ftp_form" model="ir.ui.view">
             <field name="name">FTP Client Settings</field>
             <field name="model">client.ftp</field>
-            <field name="type">form</field>
             <field name="arch" type="xml">
-                <group colspan="4">
-                    <group string="Server">
-                        <field name="name"/>
-                        <field name="host"/>
-                        <field name="port"/>
+                <form string="FTP Client Settings">
+                    <group colspan="4">
+                        <group string="Server">
+                            <field name="name"/>
+                            <field name="host"/>
+                            <field name="port"/>
+                            <field name="tls"/>
+                        </group>
+                        <group string="Login">
+                            <field name="user"/>
+                            <field name="password"/>
+                        </group>
                     </group>
-                    <group string="Login">
-                        <field name="user"/>
-                        <field name="password"/>
+                    <group>
+                        <button name="test_connection" type="object" string="Test Connection" icon="gtk-apply"/>
                     </group>
-                </group>
-                <group>
-                    <label colspan="2"/>
-                    <field name="connection_ok" colspan="1" nolabel="1"/>
-                    <button name="test_connection" type="object" string="Test Connection" icon="gtk-apply"/>
-                </group>
+                </form>
             </field>
         </record>
 
         <record id="view_client_ftp_tree" model="ir.ui.view">
             <field name="name">FTP Client Settings</field>
             <field name="model">client.ftp</field>
-            <field name="type">tree</field>
             <field name="arch" type="xml">
-                <field name="name"/>
-                <field name="host"/>
-                <field name="port"/>
-                <field name="user"/>
+                <tree string="FTP Client Settings">
+                    <field name="name"/>
+                    <field name="host"/>
+                    <field name="port"/>
+                    <field name="user"/>
+                </tree>
             </field>
         </record>
 
@@ -44,8 +45,9 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem id="menu_client_ftp" name="FTP Client Settings"
-                  parent="base.menu_config"
+        <menuitem id="menu_ftp" name="FTP" parent="base.menu_custom"/>
+        <menuitem id="menu_client_ftp" name="Client Settings"
+                  parent="menu_ftp"
                   action="action_client_ftp"/>
     </data>
 </openerp>

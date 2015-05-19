@@ -6,6 +6,7 @@ from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from ftplib import FTP, FTP_TLS
 from StringIO import StringIO
+from utils import generate_paths
 
 
 class ClientFTP(orm.Model):
@@ -20,10 +21,29 @@ class ClientFTP(orm.Model):
         'user': fields.char('User', size=64),
         'password': fields.char('Password', size=64),
         'tls': fields.boolean('TLS'),
+        'upload_paths': fields.char('Upload paths', size=128,
+            help=("A comma separated list of UNIX paths where "
+                  "files will be uploaded, ex. tmp,uploads/oe ")),
     }
     _defaults = {
         'port': 21,
     }
+
+    def get_upload_paths_one(self, cr, uid, id, filename, context=None):
+        """
+            Generates a list of UNIX paths from upload_paths
+            and appends the filename.
+        """
+        upload_paths = self.read(
+            cr, uid, [id], ['upload_paths'],
+            context=context)[0]['upload_paths']
+        return generate_paths(upload_paths, filename)
+
+    def get_upload_paths(self, cr, uid, ids, filename, context=None):
+        results = [
+            self.get_upload_paths_one(cr, uid, id, filename, context)
+            for id in ids]
+        return dict(zip(ids, results))
 
     def test_connection(self, cr, uid, ids, context=None):
         try:

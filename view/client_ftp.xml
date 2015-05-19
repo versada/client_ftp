@@ -18,6 +18,9 @@
                             <field name="user"/>
                             <field name="password"/>
                         </group>
+                        <group colspan="4" col="4" string="Paths">
+                            <field name="upload_paths"/>
+                        </group>
                     </group>
                     <group colspan="4" col="4">
                         <button name="test_connection" type="object" string="Test Connection" icon="gtk-apply"/>

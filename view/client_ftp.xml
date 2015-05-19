@@ -4,21 +4,22 @@
         <record id="view_client_ftp_form" model="ir.ui.view">
             <field name="name">FTP Client Settings</field>
             <field name="model">client.ftp</field>
+            <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="FTP Client Settings">
-                    <group colspan="4">
-                        <group string="Server">
+                    <group colspan="4" col="4">
+                        <group colspan="4" col="4" string="Server">
                             <field name="name"/>
                             <field name="host"/>
                             <field name="port"/>
                             <field name="tls"/>
                         </group>
-                        <group string="Login">
+                        <group colspan="4" col="4" string="Login">
                             <field name="user"/>
                             <field name="password"/>
                         </group>
                     </group>
-                    <group>
+                    <group colspan="4" col="4">
                         <button name="test_connection" type="object" string="Test Connection" icon="gtk-apply"/>
                     </group>
                 </form>
@@ -28,6 +29,7 @@
         <record id="view_client_ftp_tree" model="ir.ui.view">
             <field name="name">FTP Client Settings</field>
             <field name="model">client.ftp</field>
+            <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="FTP Client Settings">
                     <field name="name"/>

@@ -2,95 +2,95 @@
 # This file is part of OpenERP. The COPYRIGHT file at the top level of
 # this module contains the full copyright notices and license terms.
 
-from openerp.osv import orm, fields
+from openerp import models, fields, api
 from openerp.tools.translate import _
 from ftplib import FTP, FTP_TLS
+from openerp.exceptions import Warning
 from StringIO import StringIO
 
 
-class ClientFTP(orm.Model):
+class ClientFTP(models.Model):
     """
         Simple model for easier connecting to FTP server and some helpers.
     """
     _name = 'client.ftp'
-    _columns = {
-        'name': fields.char('Name', size=64, required=True),
-        'host': fields.char('Host', size=64, required=True),
-        'port': fields.integer('Port', size=5, required=True),
-        'user': fields.char('User', size=64),
-        'password': fields.char('Password', size=64),
-        'tls': fields.boolean('TLS'),
-    }
-    _defaults = {
-        'port': 21,
-    }
 
-    def test_connection(self, cr, uid, ids, context=None):
+    name = fields.Char('Name', size=64, required=True)
+    host = fields.Char('Host', size=64, required=True)
+    port = fields.Integer('Port', size=5, required=True, default=21)
+    user = fields.Char('User', size=64)
+    password = fields.Char('Password', size=64)
+    tls = fields.Boolean('TLS')
+
+    @api.multi
+    def test_connection(self):
         try:
-            ftp_conn = self.connect(cr, uid, ids, context)
+            ftp_conn = self.connect()
             ftp_conn.retrlines('LIST')
         except:
             raise
         else:
             ftp_conn.quit()
-            raise orm.except_orm(
+            raise Warning(
                 _('Success!'),
                 _('Successfully connected to ftp server')
             )
 
         return True
 
-    def connect(self, cr, uid, ids, context=None):
-        ids = ids[0] if isinstance(ids, (list, tuple)) else ids
-        settings = self.read(cr, uid, ids, [], context)
+    def connect(self):
+        self.ensure_one()
 
-        if settings['tls']:
+        if self.tls:
             ftp_conn = FTP_TLS(timeout=15)
         else:
             ftp_conn = FTP(timeout=15)
 
         try:
-            ftp_conn.connect(host=settings['host'], port=settings['port'])
-            ftp_conn.login(user=settings['user'], passwd=settings['password'])
-            if settings['tls']:
+            ftp_conn.connect(host=self.host, port=self.port)
+            ftp_conn.login(user=self.user, passwd=self.password)
+            if self.tls:
                 ftp_conn.prot_p()
         except Exception as exc:
-            raise orm.except_orm(
+            raise Warning(
                 _('FTP Error'),
                 _('Could not connect to FTP Server\n\n%s') % exc
             )
 
         return ftp_conn
 
-    def upload(self, cr, uid, ids, ftp_conn, filedata, filepaths, context=None):
+    @staticmethod
+    def upload(ftp_conn, filedata, filepaths):
         try:
             for filepath in filepaths:
                 ftp_conn.storbinary('STOR %s' % filepath, StringIO(filedata))
         except Exception as exc:
-            raise orm.except_orm(
+            raise Warning(
                 _('FTP Error'),
                 _('Could not upload file to FTP Server\n\n%s') % exc
             )
 
         return True
 
-    def download(self, cr, uid, ids, ftp_conn, filepath, context=None):
+    @staticmethod
+    def download(ftp_conn, filepath):
         data = StringIO()
         try:
             ftp_conn.retrbinary('RETR %s' % filepath, data.write)
         except Exception as exc:
-            raise orm.except_orm(
+            raise Warning(
                 _('FTP Error'),
                 _('Could not download file from FTP Server\n\n%s') % exc
             )
 
         return data.getvalue()
 
-    def get_file_list(self, cr, uid, ids, ftp_conn, dirpath, context=None):
+    @staticmethod
+    def get_file_list(ftp_conn, dirpath):
         try:
             return ftp_conn.nlst(dirpath)
         except Exception as exc:
-            raise orm.except_orm(
+            raise Warning(
                 _('FTP Error'),
                 _('Could not get file list from FTP Server\n\n%s') % exc
             )

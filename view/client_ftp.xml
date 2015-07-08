@@ -15,7 +15,7 @@
                         </group>
                         <group string="Login">
                             <field name="user"/>
-                            <field name="password"/>
+                            <field name="password" password="1" />
                         </group>
                     </group>
                     <group>

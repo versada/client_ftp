@@ -8,11 +8,13 @@
     'author': 'HacBee UAB',
     'website': 'http://www.hbee.eu',
     'depends': [
+        'base',
     ],
     'category': 'Client',
     'description': '''
     ''',
     'data': [
+        'security/ir.model.access.csv',
         'view/client_ftp.xml',
     ],
     'auto_install': False,

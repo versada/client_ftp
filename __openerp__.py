@@ -13,6 +13,7 @@
     'description': '''
     ''',
     'data': [
+        'security/ir.model.access.csv',
         'view/client_ftp.xml',
     ],
     'auto_install': False,
